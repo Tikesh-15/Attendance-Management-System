@@ -3,8 +3,10 @@ from tkinter import ttk, messagebox
 import sqlite3
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
-DB_FILE = "database.db"  # सुनिश्चित करें कि नाम सही है
+import os
+# Ye code database ko project ke main folder mein dhoondega
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_FILE = os.path.join(BASE_DIR, "database.db")  # सुनिश्चित करें कि नाम सही है
 
 class HomePage(tk.Frame):
     def __init__(self, parent, controller=None):
@@ -145,6 +147,7 @@ class HomePage(tk.Frame):
             tk.Label(card, text="Waiting for new data...", font=("Segoe UI", 10), bg="white").pack(pady=10)
 
     # --- CHART GENERATION LOGIC ---
+    # --- CHART GENERATION LOGIC ---
     def plot_chart_base(self, frame, labels, values, colors, chart_type):
         for w in frame.winfo_children(): w.destroy()
         if not values or sum(values) == 0:
@@ -157,15 +160,16 @@ class HomePage(tk.Frame):
         if chart_type == "pie":
             ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
         else:
-            # ✅ यहाँ फिक्स है: पहले set_xticks करें, फिर set_xticklabels
             x_pos = range(len(labels))
             ax.set_xticks(x_pos) 
             ax.set_xticklabels(labels, rotation=15, ha='right', fontsize=8)
-            
-            ax.bar(x_pos, values, color=colors[0] if colors else "#3b82f6", width=0.5)
+            # Yahan fix kiya hai: color=colors ab sahi se kaam karega
+            ax.bar(x_pos, values, color=colors, width=0.5) 
             ax.grid(axis='y', linestyle='--', alpha=0.3)
         
-        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.2) # Labels niche se cutenge nahi
+        fig.tight_layout() # Ye layout ko manage karega
+        
         canvas = FigureCanvasTkAgg(fig, frame)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
